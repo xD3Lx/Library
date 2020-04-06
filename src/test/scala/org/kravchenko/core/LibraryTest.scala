@@ -1,6 +1,6 @@
 package org.kravchenko.core
 
-import org.kravchenko.core.Library.{Book, LendInfo, LendOperationSucceeded}
+import org.kravchenko.core.Library.{Book, BookInfo, LendInfo, LendInformation}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -93,7 +93,29 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     lendStore must have size 1
   }
 
+  it should "list an empty library" in new TestLibrary {
+    //When
+    val result = library.list()
 
+    //Then
+    result must be (empty)
+  }
+
+  it should "list some library with books" in new TestLibrary {
+    //Given
+    val id1 = library.addNewBook(book1)
+    val id2 = library.addNewBook(book1)
+    val id3 = library.addNewBook(book2)
+
+    library.lend(id2, "some person")
+
+    //When
+    val result = library.list()
+
+    //Then
+    result must have size 2
+    result must contain allOf(BookInfo(book1, LendInformation(1, 1)), BookInfo(book2, LendInformation(1, 0)))
+  }
 
 }
 
