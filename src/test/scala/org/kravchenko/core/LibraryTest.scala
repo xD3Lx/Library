@@ -1,6 +1,6 @@
 package org.kravchenko.core
 
-import org.kravchenko.core.Library.{Book, BookInfo, LendInfo, LendInformation, SearchQuery}
+import org.kravchenko.core.Library.{Book, BookInfo, BookInfoDetailed, LendInfo, LendInformation, SearchQuery}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import LibraryTest._
@@ -205,6 +205,41 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     result must contain (BookInfo(book1, LendInformation(1, 0)))
   }
 
+  it should "not find not existing book in the library" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.getBookDetailedInfo(-1L)
+
+    //Then
+    result must be (empty)
+  }
+
+  it should "find the existing book in the library which is not lent" in new TestLibrary {
+    //Given
+    val list = initializeWithBooks()
+
+    //When
+    val result = library.getBookDetailedInfo(list.head)
+
+    //Then
+    result must be (Some(BookInfoDetailed(book1, lent = false, person = None)))
+  }
+
+  it should "find the existing book in the library which is lent" in new TestLibrary {
+    //Given
+    val list = initializeWithBooks()
+    val id = list.head
+    library.lend(id, person)
+
+    //When
+    val result = library.getBookDetailedInfo(list.head)
+
+    //Then
+    result must be (Some(BookInfoDetailed(book1, lent = true, person = Some(person))))
+  }
+
 }
 
 object LibraryTest {
@@ -225,11 +260,11 @@ trait TestLibrary {
   def libraryStore: Seq[(Long, Book)] = library.getStore
   def lendStore: Seq[(Long, LendInfo)] = library.getLendStore
 
-  def initializeWithBooks(): Unit = {
-    library.addNewBook(book1)
-    library.addNewBook(book2)
-    library.addNewBook(book3)
-    library.addNewBook(book4)
-    ()
+  def initializeWithBooks(): List[Long] = {
+    val id1 = library.addNewBook(book1)
+    val id2 = library.addNewBook(book2)
+    val id3 = library.addNewBook(book3)
+    val id4 = library.addNewBook(book4)
+    List(id1, id2, id3, id4)
   }
 }

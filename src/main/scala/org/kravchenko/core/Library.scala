@@ -11,7 +11,7 @@ trait Library {
   def list(): List[BookInfo]
   def search(query: SearchQuery): List[BookInfo]
   def lend(id: Id, person: String): LendOperationResult
-  def getBookDetailedInfo(id: Id): BookInfoDetailed
+  def getBookDetailedInfo(id: Id): Option[BookInfoDetailed]
 }
 
 class LibraryImpl extends Library {
@@ -72,7 +72,12 @@ class LibraryImpl extends Library {
     }
   }
 
-  override def getBookDetailedInfo(id: Id): BookInfoDetailed = ???
+  override def getBookDetailedInfo(id: Id): Option[BookInfoDetailed] = {
+    store.get(id).map { book =>
+      val lendInformation = lendInfo.get(id)
+      BookInfoDetailed(book, lendInformation.isDefined, lendInformation.map(_.person))
+    }
+  }
 
   //used only for testing
   private[core] def getStore: List[(Id, Book)] = store.toList
