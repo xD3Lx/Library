@@ -18,6 +18,7 @@ trait Library {
 class LibraryImpl extends Library {
 
   private var store: Map[Id, Book] = Map.empty
+  private var lendInfo: Map[Id, LendInfo] = Map.empty
 
   private val lastId: AtomicLong = new AtomicLong(0)
 
@@ -28,22 +29,38 @@ class LibraryImpl extends Library {
   }
 
   override def removeBookById(book: Id): Unit = {
-    store = store.removed(book)
+    this.synchronized{
+      if (!lendInfo.contains(book)) {
+        store = store.removed(book)
+      }
+    }
   }
 
   override def list(): List[BookInfo] = ???
 
   override def search(query: SearchQuery): List[BookInfo] = ???
 
-  override def lend(id: Id, person: String): LendOperationResult = ???
+  override def lend(id: Id, person: String): LendOperationResult = {
+    this.synchronized {
+      if (lendInfo.contains(id)) {
+        LendOperationFailed
+      } else {
+        lendInfo = lendInfo.updated(id, LendInfo(person))
+        LendOperationSucceeded
+      }
+    }
+  }
 
   override def getBookDetailedInfo(id: Id): BookInfoDetailed = ???
 
   //used only for testing
   private[core] def getStore: List[(Id, Book)] = store.toList
+  private[core] def getLendStore: List[(Id, LendInfo)] = lendInfo.toList
 }
 
 object Library {
+  private[core] case class LendInfo(person: String)
+
   case class Book(title: String, year: Int, author: String)
 
   case class LendInformation(available: Long, lent: Long)

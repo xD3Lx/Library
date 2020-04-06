@@ -1,6 +1,6 @@
 package org.kravchenko.core
 
-import org.kravchenko.core.Library.Book
+import org.kravchenko.core.Library.{Book, LendInfo, LendOperationSucceeded}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 
@@ -51,10 +51,54 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     libraryStore must have size 0
   }
 
+  it should "not allow to delete a book which is lent" in new TestLibrary {
+    //Given
+    val id = library.addNewBook(book1)
+    library.lend(id, "some person")
+
+    //When
+    library.removeBookById(id)
+
+    //Then
+    libraryStore must have size 1
+  }
+
+//  Should allow to lent a book by ID ( should be forbidden if copy with given ID is already lent). Should allow to pass the name of the person who lend the book.
+
+  it should "allow to lend a book which is not yet lent" in new TestLibrary {
+    //Given
+    val id = library.addNewBook(book1)
+    val person = "Michael"
+
+    //When
+    val result = library.lend(id, person)
+
+    //Then
+    result must be(Library.LendOperationSucceeded)
+    lendStore must have size 1
+    lendStore must contain(id, LendInfo(person))
+  }
+
+  it should "not allow to lend a book which is already lent" in new TestLibrary {
+    //Given
+    val id = library.addNewBook(book1)
+    val person = "Michael"
+    library.lend(id, person)
+
+    //When
+    val result = library.lend(id, person)
+
+    //Then
+    result must be(Library.LendOperationFailed)
+    lendStore must have size 1
+  }
+
+
 
 }
 
 trait TestLibrary {
   val library: LibraryImpl = new LibraryImpl
   def libraryStore: Seq[(Long, Book)] = library.getStore
+  def lendStore: Seq[(Long, LendInfo)] = library.getLendStore
 }
