@@ -1,14 +1,11 @@
 package org.kravchenko.core
 
-import org.kravchenko.core.Library.{Book, BookInfo, LendInfo, LendInformation}
+import org.kravchenko.core.Library.{Book, BookInfo, LendInfo, LendInformation, SearchQuery}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
+import LibraryTest._
 
 class LibraryTest extends AnyFlatSpec with Matchers {
-
-  private val book1 = Book("The Fellowship of the Ring", 1954, "J. R. R. Tolkien")
-  private val book2 = Book("Night Watch", 1998, "Sergei Lukyanenko")
-  private val book3 = Book("The Last Wish", 1993, "Andrzej Sapkowski")
 
   "A library" should "add one new book" in new TestLibrary {
     //When
@@ -82,7 +79,6 @@ class LibraryTest extends AnyFlatSpec with Matchers {
   it should "not allow to lend a book which is already lent" in new TestLibrary {
     //Given
     val id = library.addNewBook(book1)
-    val person = "Michael"
     library.lend(id, person)
 
     //When
@@ -107,7 +103,7 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     val id2 = library.addNewBook(book1)
     val id3 = library.addNewBook(book2)
 
-    library.lend(id2, "some person")
+    library.lend(id2, person)
 
     //When
     val result = library.list()
@@ -117,10 +113,123 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     result must contain allOf(BookInfo(book1, LendInformation(1, 1)), BookInfo(book2, LendInformation(1, 0)))
   }
 
+  it should "search by title for a non-existing title" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(title = Some(NonExistingTitle)))
+
+    //Then
+    result must be (empty)
+  }
+
+  it should "search by title for an existing title" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(title = Some(book1.title)))
+
+    //Then
+    result must have size 1
+    result must contain (BookInfo(book1, LendInformation(1, 0)))
+  }
+
+  it should "search by year for a non-existing year" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(year = Some(NonExistingYear)))
+
+    //Then
+    result must be (empty)
+  }
+
+  it should "search by title for an existing year" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(year = Some(book2.year)))
+
+    //Then
+    result must have size 1
+    result must contain (BookInfo(book2, LendInformation(1, 0)))
+  }
+
+  it should "search by author for a non-existing author" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(author = Some(NonExistingAuthor)))
+
+    //Then
+    result must be (empty)
+  }
+
+  it should "search by title for an existing author" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(author = Some(book3.author)))
+
+    //Then
+    result must have size 2
+    result must contain allOf (BookInfo(book3, LendInformation(1, 0)), BookInfo(book4, LendInformation(1, 0)))
+  }
+
+  it should "search by title and author for an existing title and non-existing author" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(title = Some(book1.title), author = Some(NonExistingAuthor)))
+
+    //Then
+    result must be (empty)
+  }
+
+  it should "search by title and author for an existing title and an existing author" in new TestLibrary {
+    //Given
+    initializeWithBooks()
+
+    //When
+    val result = library.search(SearchQuery(title = Some(book1.title), author = Some(book1.author)))
+
+    //Then
+    result must have size 1
+    result must contain (BookInfo(book1, LendInformation(1, 0)))
+  }
+
+}
+
+object LibraryTest {
+  val book1 = Book("The Fellowship of the Ring", 1954, "J. R. R. Tolkien")
+  val book2 = Book("Night Watch", 1998, "Sergei Lukyanenko")
+  val book3 = Book("The Last Wish", 1993, "Andrzej Sapkowski")
+  val book4 = Book("Sword of Destiny", 1992, "Andrzej Sapkowski")
+
+  val NonExistingTitle = "non-existing title"
+  val NonExistingAuthor = "non-existing author"
+  val NonExistingYear = 2020
+
+  val person = "Michael"
 }
 
 trait TestLibrary {
   val library: LibraryImpl = new LibraryImpl
   def libraryStore: Seq[(Long, Book)] = library.getStore
   def lendStore: Seq[(Long, LendInfo)] = library.getLendStore
+
+  def initializeWithBooks(): Unit = {
+    library.addNewBook(book1)
+    library.addNewBook(book2)
+    library.addNewBook(book3)
+    library.addNewBook(book4)
+    ()
+  }
 }

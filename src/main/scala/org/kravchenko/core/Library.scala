@@ -1,7 +1,6 @@
 package org.kravchenko.core
 
 import java.util.concurrent.atomic.AtomicLong
-
 import Library._
 
 trait Library {
@@ -57,7 +56,10 @@ class LibraryImpl extends Library {
     result.map(BookInfo.tupled).toList
   }
 
-  override def search(query: SearchQuery): List[BookInfo] = ???
+  override def search(query: SearchQuery): List[BookInfo] = {
+    val filtered = store.filter { case (_, book) => query.checkBook(book) }
+    list(filtered)
+  }
 
   override def lend(id: Id, person: String): LendOperationResult = {
     this.synchronized {
@@ -90,5 +92,11 @@ object Library {
   case object LendOperationSucceeded extends LendOperationResult
   case object LendOperationFailed extends LendOperationResult
 
-  case class SearchQuery(title: Option[String], year: Option[Int], author: Option[String])
+  case class SearchQuery(title: Option[String] = None, year: Option[Int] = None, author: Option[String] = None) {
+    def checkBook(book: Book): Boolean = {
+      title.map(book.title == _).getOrElse(true) &&
+        year.map(book.year == _).getOrElse(true) &&
+          author.map(book.author == _).getOrElse(true)
+    }
+  }
 }
