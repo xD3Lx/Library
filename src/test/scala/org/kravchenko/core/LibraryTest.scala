@@ -60,8 +60,6 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     libraryStore must have size 1
   }
 
-//  Should allow to lent a book by ID ( should be forbidden if copy with given ID is already lent). Should allow to pass the name of the person who lend the book.
-
   it should "allow to lend a book which is not yet lent" in new TestLibrary {
     //Given
     val id = library.addNewBook(book1)
