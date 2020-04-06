@@ -1,5 +1,7 @@
 package org.kravchenko.core
 
+import java.util.concurrent.atomic.AtomicLong
+
 import Library._
 
 trait Library {
@@ -17,9 +19,17 @@ class LibraryImpl extends Library {
 
   private var store: Map[Id, Book] = Map.empty
 
-  override def addNewBook(book: Book): Id = ???
+  private val lastId: AtomicLong = new AtomicLong(0)
 
-  override def removeBookById(book: Id): Unit = ???
+  override def addNewBook(book: Book): Id = {
+    val id = lastId.incrementAndGet()
+    store = store.updated(id, book)
+    id
+  }
+
+  override def removeBookById(book: Id): Unit = {
+    store = store.removed(book)
+  }
 
   override def list(): List[BookInfo] = ???
 

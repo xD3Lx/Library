@@ -10,7 +10,7 @@ class LibraryTest extends AnyFlatSpec with Matchers {
   private val book2 = Book("Night Watch", 1998, "Sergei Lukyanenko")
   private val book3 = Book("The Last Wish", 1993, "Andrzej Sapkowski")
 
-  "A library" should "correctly add one new book" in new TestLibrary {
+  "A library" should "add one new book" in new TestLibrary {
     //When
     library.addNewBook(book1)
 
@@ -19,7 +19,7 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     library.getStore must contain ((1, book1))
   }
 
-  it should "correctly add multiple copies of one book" in new TestLibrary {
+  it should "add multiple copies of one book" in new TestLibrary {
     //When
     library.addNewBook(book1)
     library.addNewBook(book1)
@@ -29,7 +29,7 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     libraryStore must contain allOf ((1, book1), (2, book1))
   }
 
-  it should "correctly add multiple books" in new TestLibrary {
+  it should "add multiple books" in new TestLibrary {
     //When
     library.addNewBook(book1)
     library.addNewBook(book2)
@@ -39,6 +39,18 @@ class LibraryTest extends AnyFlatSpec with Matchers {
     libraryStore must have size 3
     libraryStore must contain allOf ((1, book1), (2, book2), (3, book3))
   }
+
+  it should "delete existing book from the library" in new TestLibrary {
+    //Given
+    library.addNewBook(book1)
+
+    //When
+    library.removeBookById(1L)
+
+    //Then
+    libraryStore must have size 0
+  }
+
 
 }
 
