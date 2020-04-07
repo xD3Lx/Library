@@ -28,6 +28,7 @@ Alternative way (using standalone script)
 2. Install sbt launcher script
 
     `curl -Lo csbt https://raw.githubusercontent.com/coursier/sbt-extras/master/sbt`
+    
     `chmod +x csbt`
 
 3. Build project
