@@ -9,7 +9,7 @@ The easiest way to build/test application is by using the official sbt ditributi
 
 1. Install from [https://www.scala-sbt.org/download.html]() with version 1.3.9
    
-   Note: For Windows system it's recommended to use msi-installer
+   Note: For Windows it's recommended to use msi-installer
 
 2. Navigate to the project directory in the terminal window depending on the operation system in use
 
