@@ -2,17 +2,19 @@
 
 **Instructions to build and run tests**
 
+Before trying to build, make sure Java is installed on the machine and configured in PATH. </br>
+You can verify the installation by running command `java -version`. </br>
+
 ### MacOS/Unix/Linux
 
 The easiest way to build/test application is by using the official sbt installer
 
 1. Install from [https://www.scala-sbt.org/download.html]() with version 1.3.9
-2. Make sure Java is installed on the machine
-3. Build project
+2. Build project
 
     `sbt compile`
 
-4. Run tests
+3. Run tests
 
     `sbt test`
 
@@ -28,13 +30,11 @@ Alternative way (using standalone script)
     `curl -Lo csbt https://raw.githubusercontent.com/coursier/sbt-extras/master/sbt`
     `chmod +x csbt`
 
-3. Make sure Java is installed on the machine
-
-4. Build project
+3. Build project
 
     `./csbt compile`
 
-5. Run tests
+4. Run tests
 
     `./csbt test`
 
